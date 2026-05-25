@@ -4,3 +4,4 @@ Orchestra happy-path test: Quebec City weather hello-world
 # org transfer smoke 1779553791
 # outer-loop test 1779707391
 # PR event test 1779708170
+# retrigger after kind=repo 1779708320
