@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Quebec City Weather</title>
+    <title>Today in Quebec City</title>
     <meta
       name="description"
-      content="Current weather for Quebec City, Canada. Powered by Open-Meteo."
+      content="Today's weather card for Quebec City: 14 degrees Celsius, partly cloudy."
     />
     <style>
       :root {
@@ -45,23 +45,34 @@
         border: 1px solid var(--border);
         border-radius: 16px;
         padding: 32px;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04),
           0 12px 32px rgba(15, 23, 42, 0.06);
         text-align: center;
       }
-      h1 {
+      .label {
         margin: 0 0 4px;
-        font-size: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 0 0 24px;
+        font-size: 22px;
         font-weight: 600;
         letter-spacing: -0.01em;
+        color: var(--ink);
       }
-      .city {
-        color: var(--muted);
-        font-size: 14px;
-        margin-bottom: 24px;
+      .icon {
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 8px;
+        display: block;
       }
       .temp {
-        font-size: 64px;
+        font-size: 72px;
         font-weight: 700;
         line-height: 1;
         letter-spacing: -0.03em;
@@ -74,19 +85,10 @@
         margin-left: 4px;
       }
       .descriptor {
-        margin-top: 12px;
+        margin-top: 16px;
         font-size: 20px;
         font-weight: 500;
         color: var(--accent);
-      }
-      .status {
-        margin-top: 16px;
-        font-size: 13px;
-        color: var(--muted);
-        min-height: 16px;
-      }
-      .status.error {
-        color: #b91c1c;
       }
       footer {
         margin-top: 24px;
@@ -94,94 +96,31 @@
         color: var(--muted);
         text-align: center;
       }
-      footer a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Quebec City Weather</h1>
-      <div class="city">Quebec City, Canada</div>
-      <div class="temp" id="temp" aria-live="polite">--<span class="unit">&deg;C</span></div>
-      <div class="descriptor" id="descriptor" aria-live="polite">Loading&hellip;</div>
-      <div class="status" id="status"></div>
-    </main>
-    <footer>
-      Data source:
-      <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer"
-        >Open-Meteo</a
+      <p class="label">Today</p>
+      <h1>Quebec City, Canada</h1>
+      <svg
+        class="icon"
+        viewBox="0 0 64 64"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
-    </footer>
-    <script>
-      // WMO weather codes → single-word descriptor.
-      // Reference: https://open-meteo.com/en/docs (WMO Weather interpretation codes)
-      const WMO = {
-        0: "Sunny",
-        1: "Sunny",
-        2: "Cloudy",
-        3: "Cloudy",
-        45: "Fog",
-        48: "Fog",
-        51: "Drizzle",
-        53: "Drizzle",
-        55: "Drizzle",
-        56: "Drizzle",
-        57: "Drizzle",
-        61: "Rain",
-        63: "Rain",
-        65: "Rain",
-        66: "Rain",
-        67: "Rain",
-        71: "Snow",
-        73: "Snow",
-        75: "Snow",
-        77: "Snow",
-        80: "Rain",
-        81: "Rain",
-        82: "Rain",
-        85: "Snow",
-        86: "Snow",
-        95: "Storm",
-        96: "Storm",
-        99: "Storm",
-      };
-
-      const URL =
-        "https://api.open-meteo.com/v1/forecast?latitude=46.8139&longitude=-71.2080&current=temperature_2m,weather_code&timezone=America/Toronto";
-
-      async function load() {
-        const tempEl = document.getElementById("temp");
-        const descEl = document.getElementById("descriptor");
-        const statusEl = document.getElementById("status");
-        try {
-          const res = await fetch(URL);
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          const data = await res.json();
-          const t = data?.current?.temperature_2m;
-          const code = data?.current?.weather_code;
-          if (typeof t !== "number" || typeof code !== "number") {
-            throw new Error("Malformed response");
-          }
-          tempEl.innerHTML =
-            Math.round(t) + '<span class="unit">&deg;C</span>';
-          descEl.textContent = WMO[code] ?? "Unknown";
-          const time = data?.current?.time;
-          statusEl.textContent = time ? "Updated " + time : "";
-          statusEl.classList.remove("error");
-        } catch (err) {
-          descEl.textContent = "Unavailable";
-          statusEl.textContent =
-            "Couldn't load weather: " + (err?.message || "unknown error");
-          statusEl.classList.add("error");
-        }
-      }
-
-      load();
-    </script>
+        <circle cx="24" cy="24" r="10" fill="#fbbf24" />
+        <path
+          d="M44 44a10 10 0 0 0-19.5-3.1A8 8 0 1 0 22 56h24a8 8 0 0 0 0-16 8 8 0 0 0-2 4z"
+          fill="#cbd5e1"
+          stroke="#94a3b8"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <div class="temp">14<span class="unit">&deg;C</span></div>
+      <div class="descriptor">Partly cloudy</div>
+    </main>
+    <footer>Static demo &middot; no external data</footer>
   </body>
 </html>
