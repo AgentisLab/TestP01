@@ -239,6 +239,32 @@
       .pill { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-ink); }
       .pill.empty { background: var(--bg); color: var(--muted); }
 
+      /* ===== Analytics ===== */
+      .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+      .stat { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 14px; }
+      .stat .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+      .stat .v { font-family: "Space Grotesk", sans-serif; font-size: 24px; font-weight: 700; margin-top: 4px; }
+      .stat .v small { font-size: 13px; font-weight: 600; color: var(--muted); }
+      .stat .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+      .stat .v.good { color: var(--good); }
+      .stat.hero { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
+      .stat.hero .logo { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: #fff; flex: none; font-family: "Inter"; }
+      .stat.hero .big { margin-left: auto; text-align: right; }
+      .stat.hero .big .p { font-family: "Space Grotesk"; font-size: 26px; font-weight: 700; color: var(--good); }
+      .stat.hero .big .u { font-size: 12px; color: var(--muted); font-weight: 700; }
+
+      .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px; }
+      .card h3 { margin: 0 0 2px; font-size: 16px; font-weight: 700; }
+      .card .cap { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+      .chart { width: 100%; display: block; }
+      .legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 10px; }
+      .legend .li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+      .legend .sw { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+      .delta-up { color: var(--warn); font-weight: 700; }
+      .delta-down { color: var(--good); font-weight: 700; }
+      .state-msg { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 22px 16px; text-align: center; color: var(--muted); }
+      .state-msg b { color: var(--ink); }
+
       /* ===== Bottom tab bar ===== */
       #tabbar {
         position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 20;
@@ -440,6 +466,26 @@
         </div>
       </section>
 
+      <!-- ============ ANALYTICS ============ -->
+      <section id="screen-analytics" class="screen">
+        <div class="topbar">
+          <div class="eyebrow">Trends · last 30 days</div>
+          <h1>Analytics</h1>
+        </div>
+        <div class="scroll">
+          <div class="seg" id="an-fuel-seg">
+            <button data-fuel="regular" class="on">Regular</button>
+            <button data-fuel="super">Super</button>
+            <button data-fuel="diesel">Diesel</button>
+          </div>
+          <div class="seg" id="an-region-seg"><!-- region buttons rendered by JS --></div>
+
+          <div id="an-body">
+            <div class="state-msg" id="an-loading">Loading price history…</div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ TAB BAR ============ -->
       <nav id="tabbar">
         <button data-tab="map" class="on">
@@ -449,6 +495,10 @@
         <button data-tab="pricing">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span>Pricing</span>
+        </button>
+        <button data-tab="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          <span>Analytics</span>
         </button>
         <button data-tab="settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -492,6 +542,7 @@
           onboarding: document.getElementById("screen-onboarding"),
           map: document.getElementById("screen-map"),
           pricing: document.getElementById("screen-pricing"),
+          analytics: document.getElementById("screen-analytics"),
           settings: document.getElementById("screen-settings")
         };
         var tabbar = document.getElementById("tabbar");
@@ -512,6 +563,7 @@
           if (name === "settings") renderSettings();
           if (name === "pricing") renderStations();
           if (name === "map") renderMap();
+          if (name === "analytics") renderAnalytics();
         }
 
         Array.prototype.forEach.call(tabbar.querySelectorAll("button"), function (b) {
@@ -755,6 +807,208 @@
         colocatedBtn.addEventListener("click", openSheet);
         sheetBackdrop.addEventListener("click", closeSheet);
         document.getElementById("sheet-grab").addEventListener("click", closeSheet);
+
+        // ---------- analytics (reads REAL seeded data/prices.json via fetch) ----------
+        var priceData = null;       // cached dataset
+        var priceDataErr = false;
+        var anFuel = state.fuel || "regular";
+        var anRegion = null;        // chosen on first load from dataset
+        var anRegionBuilt = false;
+
+        function loadPriceData() {
+          if (priceData || priceDataErr) return Promise.resolve(priceData);
+          return fetch("/data/prices.json", { cache: "no-cache" })
+            .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            .then(function (d) { priceData = d; return d; })
+            .catch(function (e) { priceDataErr = true; console.warn("price data load failed", e); return null; });
+        }
+
+        function seriesFor(region, fuel) {
+          return priceData.series.filter(function (s) { return s.region === region && s.fuel === fuel; });
+        }
+        // average price per day across brands in a region
+        function regionDailyAvg(region, fuel) {
+          var ss = seriesFor(region, fuel);
+          return priceData.days.map(function (_, i) {
+            var sum = 0; ss.forEach(function (s) { sum += s.prices[i]; });
+            return ss.length ? sum / ss.length : 0;
+          });
+        }
+        // cheapest brand price per day in a region
+        function regionDailyMin(region, fuel) {
+          var ss = seriesFor(region, fuel);
+          return priceData.days.map(function (_, i) {
+            return Math.min.apply(null, ss.map(function (s) { return s.prices[i]; }));
+          });
+        }
+        function lastOf(arr) { return arr[arr.length - 1]; }
+
+        // ---- SVG chart helpers ----
+        var SVG_NS = "http://www.w3.org/2000/svg";
+        function fmt1(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+
+        // line chart: lines = [{label,color,values:[...]}], xlabels aligned to values
+        function lineChart(lines, xlabels) {
+          var W = 320, H = 180, padL = 34, padR = 8, padT = 10, padB = 22;
+          var n = lines[0].values.length;
+          var all = [];
+          lines.forEach(function (l) { all = all.concat(l.values); });
+          var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+          var span = hi - lo || 1; lo -= span * 0.12; hi += span * 0.12;
+          function X(i) { return padL + (n <= 1 ? 0 : (i / (n - 1)) * (W - padL - padR)); }
+          function Y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB); }
+          var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" preserveAspectRatio="xMidYMid meet">';
+          // horizontal gridlines + y labels (4 ticks)
+          for (var t = 0; t <= 3; t++) {
+            var val = lo + (hi - lo) * (t / 3), gy = Y(val);
+            s += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="#e2e8f0" stroke-width="1"/>';
+            s += '<text x="' + (padL - 4) + '" y="' + (gy + 3) + '" text-anchor="end" font-size="8" fill="#94a3b8" font-family="Inter">' + fmt1(val) + '</text>';
+          }
+          lines.forEach(function (l) {
+            var pts = l.values.map(function (v, i) { return X(i) + "," + Y(v); }).join(" ");
+            s += '<polyline fill="none" stroke="' + l.color + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="' + pts + '"/>';
+            // end dot
+            s += '<circle cx="' + X(n - 1) + '" cy="' + Y(lastOf(l.values)) + '" r="3" fill="' + l.color + '"/>';
+          });
+          // x labels: first, middle, last
+          var idxs = [0, Math.floor((n - 1) / 2), n - 1];
+          idxs.forEach(function (i) {
+            var anchor = i === 0 ? "start" : (i === n - 1 ? "end" : "middle");
+            s += '<text x="' + X(i) + '" y="' + (H - 6) + '" text-anchor="' + anchor + '" font-size="8" fill="#94a3b8" font-family="Inter">' + xlabels[i] + '</text>';
+          });
+          return s + "</svg>";
+        }
+
+        // grouped vertical bar chart: items = [{label,value,color,best?}]
+        function barChart(items) {
+          var W = 320, H = 170, padL = 34, padR = 8, padT = 12, padB = 30;
+          var vals = items.map(function (i) { return i.value; });
+          var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+          var span = hi - lo || 1; var base = lo - span * 0.25, top = hi + span * 0.12;
+          function Y(v) { return padT + (1 - (v - base) / (top - base)) * (H - padT - padB); }
+          var n = items.length, gap = 10;
+          var bw = (W - padL - padR - gap * (n - 1)) / n;
+          var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" preserveAspectRatio="xMidYMid meet">';
+          for (var t = 0; t <= 3; t++) {
+            var val = base + (top - base) * (t / 3), gy = Y(val);
+            s += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="#eef2f7" stroke-width="1"/>';
+            s += '<text x="' + (padL - 4) + '" y="' + (gy + 3) + '" text-anchor="end" font-size="8" fill="#94a3b8" font-family="Inter">' + fmt1(val) + '</text>';
+          }
+          items.forEach(function (it, i) {
+            var x = padL + i * (bw + gap), y = Y(it.value), h = (H - padB) - y;
+            s += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + Math.max(0, h) + '" rx="4" fill="' + it.color + '"/>';
+            s += '<text x="' + (x + bw / 2) + '" y="' + (y - 4) + '" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f172a" font-family="Space Grotesk">' + fmt1(it.value) + '</text>';
+            // wrap label to fit
+            var lbl = it.label.length > 9 ? it.label.slice(0, 8) + "…" : it.label;
+            s += '<text x="' + (x + bw / 2) + '" y="' + (H - 16) + '" text-anchor="middle" font-size="8" fill="#64748b" font-family="Inter">' + lbl + '</text>';
+            if (it.best) s += '<text x="' + (x + bw / 2) + '" y="' + (H - 5) + '" text-anchor="middle" font-size="7.5" font-weight="800" fill="#16a34a" font-family="Inter">CHEAPEST</text>';
+          });
+          return s + "</svg>";
+        }
+
+        function buildRegionSeg() {
+          if (anRegionBuilt) return;
+          var seg = document.getElementById("an-region-seg");
+          anRegion = anRegion || priceData.meta.regions[0];
+          seg.innerHTML = priceData.meta.regions.map(function (r, i) {
+            return '<button data-region="' + r + '"' + (r === anRegion ? ' class="on"' : "") + ">" + r + "</button>";
+          }).join("");
+          Array.prototype.forEach.call(seg.querySelectorAll("button"), function (b) {
+            b.addEventListener("click", function () {
+              anRegion = b.dataset.region;
+              Array.prototype.forEach.call(seg.querySelectorAll("button"), function (x) { x.classList.toggle("on", x === b); });
+              renderAnalytics();
+            });
+          });
+          anRegionBuilt = true;
+        }
+
+        function renderAnalytics() {
+          var body = document.getElementById("an-body");
+          // sync fuel seg to current anFuel
+          Array.prototype.forEach.call(document.querySelectorAll("#an-fuel-seg button"), function (b) {
+            b.classList.toggle("on", b.dataset.fuel === anFuel);
+          });
+          if (!priceData) {
+            body.innerHTML = '<div class="state-msg" id="an-loading">Loading price history…</div>';
+            loadPriceData().then(function (d) {
+              if (!d) {
+                body.innerHTML = '<div class="state-msg"><b>Couldn\'t load price history.</b><br>data/prices.json is unavailable. Check your connection and reopen Analytics.</div>';
+                return;
+              }
+              renderAnalytics();
+            });
+            return;
+          }
+          buildRegionSeg();
+
+          var ss = seriesFor(anRegion, anFuel);
+          var days = priceData.days;
+          var avg = regionDailyAvg(anRegion, anFuel);
+          var mins = regionDailyMin(anRegion, anFuel);
+
+          // cheapest-now: min latest brand price in region/fuel
+          var latest = ss.map(function (s) { return { brand: s.brand, price: lastOf(s.prices) }; });
+          latest.sort(function (a, b) { return a.price - b.price; });
+          var cheapest = latest[0];
+          var avgNow = lastOf(avg);
+          var avgPrev = avg[avg.length - 2];
+          var delta = avgNow - avgPrev;
+          var st = brandStyle(cheapest.brand);
+
+          // per-brand latest comparison
+          var brandItems = latest.map(function (b, i) {
+            return { label: b.brand, value: b.price, color: brandStyle(b.brand).bg, best: i === 0 };
+          });
+          // per-region latest avg comparison (current fuel)
+          var regionItems = priceData.meta.regions.map(function (r) {
+            return { region: r, value: lastOf(regionDailyAvg(r, anFuel)) };
+          });
+          var regMin = Math.min.apply(null, regionItems.map(function (r) { return r.value; }));
+          var regionBars = regionItems.map(function (r) {
+            return { label: r.region, value: r.value, color: r.value === regMin ? "#16a34a" : "#0284c7", best: r.value === regMin };
+          });
+
+          var fuelLabel = FUEL_LABEL[anFuel];
+          var html = "";
+          // summary stat cards
+          html += '<div class="summary-grid">';
+          html += '<div class="stat hero"><div class="logo" style="background:' + st.bg + ";color:" + st.fg + '">' + st.mark + "</div>"
+            + "<div><div class=\"k\">Cheapest now · " + anRegion + "</div><div class=\"v\" style=\"font-size:18px\">" + cheapest.brand + "</div>"
+            + '<div class="sub">' + fuelLabel + "</div></div>"
+            + '<div class="big"><span class="p">' + fmt1(cheapest.price) + '</span><div class="u">¢/L</div></div></div>';
+          html += '<div class="stat"><div class="k">Regional average</div><div class="v">' + fmt1(avgNow) + '<small> ¢/L</small></div>'
+            + '<div class="sub">' + (delta >= 0
+              ? '<span class="delta-up">▲ ' + fmt1(Math.abs(delta)) + "</span> vs yesterday"
+              : '<span class="delta-down">▼ ' + fmt1(Math.abs(delta)) + "</span> vs yesterday") + "</div></div>";
+          html += '<div class="stat"><div class="k">vs avg (cheapest)</div><div class="v good">−' + fmt1(avgNow - cheapest.price) + '<small> ¢/L</small></div>'
+            + '<div class="sub">save at ' + cheapest.brand + "</div></div>";
+          html += "</div>";
+
+          // price trend line chart (avg + cheapest)
+          var xl = days.map(function (d) { return d.slice(5); }); // MM-DD
+          html += '<div class="card"><h3>Price trend · ' + fuelLabel + '</h3><p class="cap">' + anRegion + " · " + days.length + " days (¢/L)</p>"
+            + lineChart([
+                { label: "Region average", color: "#0284c7", values: avg },
+                { label: "Cheapest brand", color: "#16a34a", values: mins }
+              ], xl)
+            + '<div class="legend"><span class="li"><span class="sw" style="background:#0284c7"></span>Region average</span>'
+            + '<span class="li"><span class="sw" style="background:#16a34a"></span>Cheapest brand</span></div></div>';
+
+          // per-brand comparison bar chart
+          html += '<div class="card"><h3>By brand</h3><p class="cap">Latest ' + fuelLabel.toLowerCase() + " price · " + anRegion + " (¢/L)</p>"
+            + barChart(brandItems) + "</div>";
+
+          // per-region comparison bar chart
+          html += '<div class="card"><h3>By region</h3><p class="cap">Latest ' + fuelLabel.toLowerCase() + " average across regions (¢/L)</p>"
+            + barChart(regionBars) + "</div>";
+
+          body.innerHTML = html;
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll("#an-fuel-seg button"), function (b) {
+          b.addEventListener("click", function () { anFuel = b.dataset.fuel; renderAnalytics(); });
+        });
 
         // ---------- boot ----------
         if (state.onboarded) {
