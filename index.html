@@ -2,186 +2,610 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Quebec City Weather</title>
-    <meta
-      name="description"
-      content="Current weather for Quebec City, Canada. Powered by Open-Meteo."
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#0284c7" />
+    <meta name="description" content="Gas Tracker — find the cheapest fuel near you." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Gas Tracker" />
+    <title>Gas Tracker</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
     />
     <style>
       :root {
-        --bg: #f6f8fb;
-        --card: #ffffff;
+        --brand: #0284c7;
+        --brand-ink: #075985;
+        --brand-soft: #e0f2fe;
+        --bg: #f1f5f9;
+        --surface: #ffffff;
         --ink: #0f172a;
-        --muted: #475569;
-        --accent: #0284c7;
-        --border: #e2e8f0;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --good: #16a34a;
+        --good-soft: #dcfce7;
+        --warn: #d97706;
+        --radius: 16px;
+        --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+        --tabbar-h: 64px;
       }
-      * {
-        box-sizing: border-box;
-      }
-      html,
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html, body { margin: 0; padding: 0; height: 100%; }
       body {
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--ink);
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        padding: 24px;
+        background: #cbd5e1;
+        font-size: 15px;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
       }
-      main {
+      h1, h2, h3, .display { font-family: "Space Grotesk", "Inter", sans-serif; }
+
+      /* Phone frame — app is smartphone portrait ONLY */
+      #app {
+        position: relative;
         width: 100%;
-        max-width: 420px;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 32px;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
-          0 12px 32px rgba(15, 23, 42, 0.06);
-        text-align: center;
+        max-width: 430px;
+        min-height: 100vh;
+        margin: 0 auto;
+        background: var(--bg);
+        overflow: hidden;
+        box-shadow: 0 0 0 1px var(--line);
       }
-      h1 {
-        margin: 0 0 4px;
-        font-size: 20px;
-        font-weight: 600;
-        letter-spacing: -0.01em;
+      @media (min-width: 480px) {
+        body { display: flex; align-items: center; justify-content: center; padding: 24px 0; }
+        #app { min-height: 86vh; height: 880px; border-radius: 28px; box-shadow: 0 30px 80px rgba(2,6,23,.35); }
       }
-      .city {
-        color: var(--muted);
-        font-size: 14px;
-        margin-bottom: 24px;
+
+      .screen { display: none; flex-direction: column; min-height: 100vh; }
+      @media (min-width: 480px) { .screen { min-height: 100%; } }
+      .screen.active { display: flex; }
+
+      /* generic header */
+      .topbar {
+        position: sticky; top: 0; z-index: 5;
+        padding: 14px 18px calc(14px + env(safe-area-inset-top, 0px));
+        background: var(--surface); border-bottom: 1px solid var(--line);
       }
-      .temp {
-        font-size: 64px;
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: -0.03em;
-        color: var(--ink);
+      .topbar .eyebrow { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+      .topbar h1 { margin: 2px 0 0; font-size: 22px; font-weight: 700; }
+
+      .scroll { flex: 1; overflow-y: auto; padding: 16px 16px calc(var(--tabbar-h) + 24px); -webkit-overflow-scrolling: touch; }
+
+      .brand-dot { color: var(--brand); }
+
+      /* buttons */
+      .btn {
+        appearance: none; border: 0; cursor: pointer; font-family: inherit; font-weight: 600;
+        border-radius: 12px; padding: 14px 18px; font-size: 16px; width: 100%;
+        background: var(--brand); color: #fff; transition: transform .06s ease, background .15s ease;
       }
-      .temp .unit {
-        font-size: 28px;
-        color: var(--muted);
-        font-weight: 500;
-        margin-left: 4px;
+      .btn:active { transform: scale(.985); }
+      .btn.secondary { background: var(--surface); color: var(--brand); box-shadow: inset 0 0 0 1.5px var(--brand); }
+      .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; }
+      .btn[disabled] { opacity: .45; pointer-events: none; }
+
+      /* ===== Onboarding ===== */
+      #screen-onboarding { background: var(--surface); }
+      .ob-wrap { flex: 1; display: flex; flex-direction: column; padding: 28px 22px calc(22px + env(safe-area-inset-bottom,0px)); min-height: 100vh; }
+      @media (min-width:480px){ .ob-wrap { min-height: 100%; } }
+      .ob-progress { display: flex; gap: 6px; margin-bottom: 26px; }
+      .ob-progress span { height: 4px; flex: 1; border-radius: 99px; background: var(--line); }
+      .ob-progress span.on { background: var(--brand); }
+      .ob-step { display: none; flex: 1; flex-direction: column; animation: fade .25s ease; }
+      .ob-step.active { display: flex; }
+      @keyframes fade { from { opacity: 0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+      .ob-logo { width: 56px; height: 56px; border-radius: 16px; background: var(--brand); display: grid; place-items: center; margin-bottom: 20px; box-shadow: var(--shadow); }
+      .ob-logo svg { width: 30px; height: 30px; }
+      .ob-step h2 { font-size: 26px; line-height: 1.15; margin: 0 0 10px; }
+      .ob-step p.lead { color: var(--muted); margin: 0 0 24px; font-size: 16px; }
+      .ob-spacer { flex: 1; }
+
+      .choice-grid { display: grid; gap: 12px; }
+      .choice {
+        display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 14px;
+        background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; transition: .12s;
       }
-      .descriptor {
-        margin-top: 12px;
-        font-size: 20px;
-        font-weight: 500;
-        color: var(--accent);
+      .choice .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; font-size: 20px; flex: none; }
+      .choice .label { font-weight: 600; }
+      .choice .sub { font-size: 13px; color: var(--muted); font-weight: 400; }
+      .choice .tick { margin-left: auto; width: 22px; height: 22px; border-radius: 99px; box-shadow: inset 0 0 0 2px var(--line); display: grid; place-items: center; color: transparent; font-size: 13px; font-weight: 700; }
+      .choice.sel { box-shadow: inset 0 0 0 2px var(--brand); background: var(--brand-soft); }
+      .choice.sel .tick { background: var(--brand); box-shadow: none; color: #fff; }
+      .choice.sel .ic { background: #fff; }
+
+      .brand-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .chip {
+        padding: 14px 12px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line);
+        font-weight: 600; text-align: center; cursor: pointer; transition: .12s; font-size: 14px;
       }
-      .status {
-        margin-top: 16px;
-        font-size: 13px;
-        color: var(--muted);
-        min-height: 16px;
+      .chip.sel { box-shadow: inset 0 0 0 2px var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+
+      /* ===== Map ===== */
+      .map-canvas {
+        position: relative; height: 320px; border-radius: var(--radius); overflow: hidden;
+        background:
+          radial-gradient(circle at 20% 30%, #e2e8f0 0 2px, transparent 3px) 0 0/40px 40px,
+          radial-gradient(circle at 70% 80%, #e2e8f0 0 2px, transparent 3px) 0 0/56px 56px,
+          linear-gradient(135deg, #eef2f7, #e8eef5);
+        box-shadow: var(--shadow); margin-bottom: 16px;
       }
-      .status.error {
-        color: #b91c1c;
+      .road { position: absolute; background: #fff; box-shadow: 0 0 0 1px #e2e8f0; }
+      .pin { position: absolute; transform: translate(-50%, -100%); cursor: pointer; }
+      .pin .dot { width: 16px; height: 16px; border-radius: 99px; background: var(--brand); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(2,6,23,.3); margin: 0 auto; }
+      .pin.cheap .dot { background: var(--good); }
+      /* SET1-C5: dot + smart callout */
+      .callout {
+        position: absolute; transform: translate(-50%, -100%); margin-top: -8px;
+        background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 8px 10px; white-space: nowrap;
+        font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px;
       }
-      footer {
-        margin-top: 24px;
-        font-size: 12px;
-        color: var(--muted);
-        text-align: center;
+      .callout .price { color: var(--good); }
+      .callout::after { content: ""; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #fff; }
+      .map-fab { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 12px; background: #fff; box-shadow: var(--shadow); display: grid; place-items: center; border: 0; cursor: pointer; }
+
+      /* mini-card hero (SET1-C5 expanded) */
+      .hero-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 16px; }
+      .hero-card .row { display: flex; align-items: center; gap: 12px; }
+      .hero-card .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-soft); color: var(--brand-ink); display: grid; place-items: center; font-weight: 700; }
+      .hero-card .name { font-weight: 700; }
+      .hero-card .meta { font-size: 13px; color: var(--muted); }
+      .hero-card .big { margin-left: auto; text-align: right; }
+      .hero-card .big .p { font-family: "Space Grotesk"; font-size: 24px; font-weight: 700; color: var(--good); }
+
+      /* ===== Pricing list ===== */
+      .seg { display: flex; gap: 6px; background: var(--surface); padding: 5px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); margin-bottom: 14px; }
+      .seg button { flex: 1; border: 0; background: transparent; padding: 9px 0; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--muted); cursor: pointer; font-family: inherit; }
+      .seg button.on { background: var(--brand); color: #fff; }
+      .avg-banner { display: flex; align-items: center; gap: 10px; background: var(--brand-soft); color: var(--brand-ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+      .avg-banner .v { margin-left: auto; font-family: "Space Grotesk"; font-size: 16px; }
+
+      .station { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 14px; margin-bottom: 10px; }
+      .station .logo { width: 42px; height: 42px; border-radius: 11px; background: var(--bg); display: grid; place-items: center; font-weight: 700; color: var(--brand-ink); flex: none; }
+      .station .info { min-width: 0; }
+      .station .info .n { font-weight: 600; }
+      .station .info .d { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .station .pr { margin-left: auto; text-align: right; flex: none; }
+      .station .pr .p { font-family: "Space Grotesk"; font-weight: 700; font-size: 18px; }
+      .station .pr .p.low { color: var(--good); }
+      .station .pr .tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--good); background: var(--good-soft); padding: 2px 7px; border-radius: 99px; margin-top: 2px; }
+
+      /* ===== Settings ===== */
+      .group { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+      .group .gh { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 14px 16px 6px; }
+      .item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+      .item:first-of-type { border-top: 0; }
+      .item .t { font-weight: 500; }
+      .item .s { font-size: 13px; color: var(--muted); }
+      .item .right { margin-left: auto; color: var(--muted); font-weight: 600; font-size: 14px; }
+      .switch { margin-left: auto; width: 46px; height: 28px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; transition: .15s; flex: none; }
+      .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 99px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: .15s; }
+      .switch.on { background: var(--brand); }
+      .switch.on::after { transform: translateX(18px); }
+      .pills { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 16px; }
+      .pill { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-ink); }
+      .pill.empty { background: var(--bg); color: var(--muted); }
+
+      /* ===== Bottom tab bar ===== */
+      #tabbar {
+        position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 20;
+        width: 100%; max-width: 430px; height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-top: 1px solid var(--line);
+        display: none; align-items: stretch;
       }
-      footer a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
+      @media (min-width: 480px) { #tabbar { position: absolute; bottom: 0; border-radius: 0 0 28px 28px; } }
+      #tabbar.show { display: flex; }
+      #tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--muted); cursor: pointer; font-family: inherit; }
+      #tabbar button svg { width: 24px; height: 24px; }
+      #tabbar button span { font-size: 11px; font-weight: 600; }
+      #tabbar button.on { color: var(--brand); }
+
+      .install-toast { position: absolute; left: 12px; right: 12px; bottom: calc(var(--tabbar-h) + 16px); background: var(--ink); color: #fff; border-radius: 12px; padding: 12px 14px; display: none; align-items: center; gap: 10px; z-index: 30; box-shadow: var(--shadow); }
+      .install-toast.show { display: flex; }
+      .install-toast button { margin-left: auto; background: var(--brand); color: #fff; border: 0; padding: 8px 14px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+      .install-toast .x { background: transparent; padding: 8px; }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Quebec City Weather</h1>
-      <div class="city">Quebec City, Canada</div>
-      <div class="temp" id="temp" aria-live="polite">--<span class="unit">&deg;C</span></div>
-      <div class="descriptor" id="descriptor" aria-live="polite">Loading&hellip;</div>
-      <div class="status" id="status"></div>
-    </main>
-    <footer>
-      Data source:
-      <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer"
-        >Open-Meteo</a
-      >
-    </footer>
+    <div id="app">
+      <!-- ============ ONBOARDING ============ -->
+      <section id="screen-onboarding" class="screen">
+        <div class="ob-wrap">
+          <div class="ob-progress" id="ob-progress">
+            <span class="on"></span><span></span><span></span>
+          </div>
+
+          <!-- Step 1: welcome -->
+          <div class="ob-step active" data-step="0">
+            <div class="ob-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14"/><path d="M2 20h14"/><path d="M14 9h2.5a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-3-3"/><circle cx="9" cy="9" r="1.5"/></svg>
+            </div>
+            <h2>Cheapest fuel,<br />before you drive.</h2>
+            <p class="lead">Gas Tracker watches prices across stations near you and tells you where to fill up. Let's set up your two-minute profile.</p>
+            <div class="ob-spacer"></div>
+            <button class="btn" data-next>Get started</button>
+            <button class="btn ghost" data-skip style="margin-top:8px">Skip for now</button>
+          </div>
+
+          <!-- Step 2: fuel type (real schema: regular / super / diesel) -->
+          <div class="ob-step" data-step="1">
+            <h2>What do you fuel up with?</h2>
+            <p class="lead">We'll show prices and averages for your fuel by default.</p>
+            <div class="choice-grid" id="fuel-choices">
+              <div class="choice" data-fuel="regular">
+                <div class="ic">⛽</div>
+                <div><div class="label">Regular</div><div class="sub">87 octane — most common</div></div>
+                <div class="tick">✓</div>
+              </div>
+              <div class="choice" data-fuel="super">
+                <div class="ic">✨</div>
+                <div><div class="label">Super</div><div class="sub">91+ octane — premium</div></div>
+                <div class="tick">✓</div>
+              </div>
+              <div class="choice" data-fuel="diesel">
+                <div class="ic">🛢️</div>
+                <div><div class="label">Diesel</div><div class="sub">For diesel engines</div></div>
+                <div class="tick">✓</div>
+              </div>
+            </div>
+            <div class="ob-spacer"></div>
+            <button class="btn" data-next id="fuel-next" disabled>Continue</button>
+          </div>
+
+          <!-- Step 3: favorite brands (multi-select) -->
+          <div class="ob-step" data-step="2">
+            <h2>Any brands you prefer?</h2>
+            <p class="lead">Pick your favorites and we'll surface them first. Optional — choose as many as you like.</p>
+            <div class="brand-grid" id="brand-choices">
+              <div class="chip" data-brand="Shell">Shell</div>
+              <div class="chip" data-brand="Esso">Esso</div>
+              <div class="chip" data-brand="Petro-Canada">Petro-Canada</div>
+              <div class="chip" data-brand="Ultramar">Ultramar</div>
+              <div class="chip" data-brand="Costco">Costco</div>
+              <div class="chip" data-brand="Couche-Tard">Couche-Tard</div>
+            </div>
+            <div class="ob-spacer"></div>
+            <button class="btn" data-finish>Finish setup</button>
+            <button class="btn ghost" data-finish style="margin-top:8px">No preference</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MAP ============ -->
+      <section id="screen-map" class="screen">
+        <div class="topbar">
+          <div class="eyebrow">Near you · Québec</div>
+          <h1>Map</h1>
+        </div>
+        <div class="scroll">
+          <div class="map-canvas" id="map-canvas">
+            <div class="road" style="left:0; right:0; top:46%; height:10px;"></div>
+            <div class="road" style="top:0; bottom:0; left:38%; width:10px;"></div>
+            <!-- cheapest hero with smart callout (SET1-C5) -->
+            <div class="callout" style="left:38%; top:30%;">
+              <span class="brand-dot">●</span> Costco <span class="price">158.9</span>
+            </div>
+            <div class="pin cheap" style="left:38%; top:38%;"><div class="dot"></div></div>
+            <!-- satellite pins -->
+            <div class="pin" style="left:64%; top:60%;"><div class="dot"></div></div>
+            <div class="pin" style="left:22%; top:66%;"><div class="dot"></div></div>
+            <div class="pin" style="left:74%; top:30%;"><div class="dot"></div></div>
+            <button class="map-fab" title="Recenter" aria-label="Recenter">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            </button>
+          </div>
+
+          <!-- mini-card hero -->
+          <div class="hero-card" id="map-hero">
+            <div class="row">
+              <div class="logo">Co</div>
+              <div>
+                <div class="name">Costco Gas</div>
+                <div class="meta">0.8 km · regular · updated 6m ago</div>
+              </div>
+              <div class="big"><div class="p">158.9</div><div class="meta">cheapest nearby</div></div>
+            </div>
+            <button class="btn" style="margin-top:14px" data-goto="pricing">See all prices</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PRICING ============ -->
+      <section id="screen-pricing" class="screen">
+        <div class="topbar">
+          <div class="eyebrow">Live prices · ¢ / litre</div>
+          <h1>Pricing</h1>
+        </div>
+        <div class="scroll">
+          <div class="seg" id="fuel-seg">
+            <button data-fuel="regular" class="on">Regular</button>
+            <button data-fuel="super">Super</button>
+            <button data-fuel="diesel">Diesel</button>
+          </div>
+          <div class="avg-banner">
+            <span>Regional average</span>
+            <span class="v" id="avg-val">163.4</span>
+          </div>
+          <div id="station-list"><!-- rendered by JS --></div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section id="screen-settings" class="screen">
+        <div class="topbar">
+          <div class="eyebrow">Your profile</div>
+          <h1>Settings</h1>
+        </div>
+        <div class="scroll">
+          <div class="group">
+            <div class="gh">Preferences</div>
+            <div class="item">
+              <div><div class="t">Default fuel</div><div class="s">Used across map & pricing</div></div>
+              <div class="right" id="set-fuel">Regular</div>
+            </div>
+            <div class="item">
+              <div><div class="t">Distance unit</div><div class="s">Kilometres</div></div>
+              <div class="right">km</div>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="gh">Favorite brands</div>
+            <div class="pills" id="set-brands"><span class="pill empty">None selected</span></div>
+          </div>
+
+          <div class="group">
+            <div class="gh">Notifications</div>
+            <div class="item">
+              <div><div class="t">Price drop alerts</div><div class="s">When a favorite drops below average</div></div>
+              <div class="switch on" data-toggle></div>
+            </div>
+            <div class="item">
+              <div><div class="t">Weekly summary</div><div class="s">Best day to fill up</div></div>
+              <div class="switch" data-toggle></div>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="gh">About</div>
+            <div class="item"><div class="t">Version</div><div class="right">v0.5.0</div></div>
+            <div class="item"><div class="t">Appearance</div><div class="right">Light</div></div>
+          </div>
+
+          <button class="btn secondary" id="redo-onboarding">Redo setup</button>
+        </div>
+      </section>
+
+      <!-- ============ TAB BAR ============ -->
+      <nav id="tabbar">
+        <button data-tab="map" class="on">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16M15 6v16"/></svg>
+          <span>Map</span>
+        </button>
+        <button data-tab="pricing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>Pricing</span>
+        </button>
+        <button data-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- install prompt -->
+      <div class="install-toast" id="install-toast">
+        <span>Install Gas Tracker for offline access.</span>
+        <button id="install-btn">Install</button>
+        <button class="x" id="install-x" aria-label="Dismiss">✕</button>
+      </div>
+    </div>
+
     <script>
-      // WMO weather codes → single-word descriptor.
-      // Reference: https://open-meteo.com/en/docs (WMO Weather interpretation codes)
-      const WMO = {
-        0: "Sunny",
-        1: "Sunny",
-        2: "Cloudy",
-        3: "Cloudy",
-        45: "Fog",
-        48: "Fog",
-        51: "Drizzle",
-        53: "Drizzle",
-        55: "Drizzle",
-        56: "Drizzle",
-        57: "Drizzle",
-        61: "Rain",
-        63: "Rain",
-        65: "Rain",
-        66: "Rain",
-        67: "Rain",
-        71: "Snow",
-        73: "Snow",
-        75: "Snow",
-        77: "Snow",
-        80: "Rain",
-        81: "Rain",
-        82: "Rain",
-        85: "Snow",
-        86: "Snow",
-        95: "Storm",
-        96: "Storm",
-        99: "Storm",
-      };
+      (function () {
+        "use strict";
 
-      const URL =
-        "https://api.open-meteo.com/v1/forecast?latitude=46.8139&longitude=-71.2080&current=temperature_2m,weather_code&timezone=America/Toronto";
+        // ---------- mock data (matches live schema: regular/super/diesel) ----------
+        var REGIONAL_AVG = { regular: 163.4, super: 181.2, diesel: 172.0 };
+        var STATIONS = [
+          { brand: "Costco",        name: "Costco Gas",            dist: 0.8, prices: { regular: 158.9, super: 176.9, diesel: 167.4 } },
+          { brand: "Petro-Canada",  name: "Petro-Canada Charest",  dist: 1.2, prices: { regular: 161.9, super: 179.9, diesel: 170.9 } },
+          { brand: "Esso",          name: "Esso Sainte-Foy",       dist: 1.6, prices: { regular: 163.4, super: 181.9, diesel: 172.4 } },
+          { brand: "Shell",         name: "Shell Lebourgneuf",     dist: 2.3, prices: { regular: 164.9, super: 183.9, diesel: 173.9 } },
+          { brand: "Ultramar",      name: "Ultramar Henri-IV",     dist: 3.1, prices: { regular: 165.9, super: 184.9, diesel: 174.9 } }
+        ];
+        var FUEL_LABEL = { regular: "Regular", super: "Super", diesel: "Diesel" };
 
-      async function load() {
-        const tempEl = document.getElementById("temp");
-        const descEl = document.getElementById("descriptor");
-        const statusEl = document.getElementById("status");
+        // ---------- state ----------
+        var state = { fuel: "regular", brands: [], onboarded: false };
         try {
-          const res = await fetch(URL);
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          const data = await res.json();
-          const t = data?.current?.temperature_2m;
-          const code = data?.current?.weather_code;
-          if (typeof t !== "number" || typeof code !== "number") {
-            throw new Error("Malformed response");
-          }
-          tempEl.innerHTML =
-            Math.round(t) + '<span class="unit">&deg;C</span>';
-          descEl.textContent = WMO[code] ?? "Unknown";
-          const time = data?.current?.time;
-          statusEl.textContent = time ? "Updated " + time : "";
-          statusEl.classList.remove("error");
-        } catch (err) {
-          descEl.textContent = "Unavailable";
-          statusEl.textContent =
-            "Couldn't load weather: " + (err?.message || "unknown error");
-          statusEl.classList.add("error");
-        }
-      }
+          var saved = JSON.parse(localStorage.getItem("gt_profile") || "null");
+          if (saved && saved.onboarded) state = Object.assign(state, saved);
+        } catch (e) {}
+        function persist() { try { localStorage.setItem("gt_profile", JSON.stringify(state)); } catch (e) {} }
 
-      load();
+        // ---------- navigation ----------
+        var screens = {
+          onboarding: document.getElementById("screen-onboarding"),
+          map: document.getElementById("screen-map"),
+          pricing: document.getElementById("screen-pricing"),
+          settings: document.getElementById("screen-settings")
+        };
+        var tabbar = document.getElementById("tabbar");
+
+        function show(name) {
+          Object.keys(screens).forEach(function (k) {
+            screens[k].classList.toggle("active", k === name);
+          });
+          var inApp = name !== "onboarding";
+          tabbar.classList.toggle("show", inApp);
+          if (inApp) {
+            Array.prototype.forEach.call(tabbar.querySelectorAll("button"), function (b) {
+              b.classList.toggle("on", b.dataset.tab === name);
+            });
+            var sc = screens[name].querySelector(".scroll");
+            if (sc) sc.scrollTop = 0;
+          }
+          if (name === "settings") renderSettings();
+          if (name === "pricing") renderStations();
+        }
+
+        Array.prototype.forEach.call(tabbar.querySelectorAll("button"), function (b) {
+          b.addEventListener("click", function () { show(b.dataset.tab); });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll("[data-goto]"), function (el) {
+          el.addEventListener("click", function () { show(el.dataset.goto); });
+        });
+
+        // ---------- onboarding ----------
+        var obSteps = document.querySelectorAll(".ob-step");
+        var obProg = document.getElementById("ob-progress").children;
+        var obIdx = 0;
+        function gotoStep(i) {
+          obIdx = i;
+          obSteps.forEach(function (s, n) { s.classList.toggle("active", n === i); });
+          Array.prototype.forEach.call(obProg, function (p, n) { p.classList.toggle("on", n <= i); });
+        }
+        document.querySelectorAll("[data-next]").forEach(function (b) {
+          b.addEventListener("click", function () { if (obIdx < obSteps.length - 1) gotoStep(obIdx + 1); });
+        });
+        document.querySelectorAll("[data-skip]").forEach(function (b) {
+          b.addEventListener("click", finishOnboarding);
+        });
+        document.querySelectorAll("[data-finish]").forEach(function (b) {
+          b.addEventListener("click", finishOnboarding);
+        });
+
+        var fuelNext = document.getElementById("fuel-next");
+        document.querySelectorAll("#fuel-choices .choice").forEach(function (c) {
+          c.addEventListener("click", function () {
+            document.querySelectorAll("#fuel-choices .choice").forEach(function (x) { x.classList.remove("sel"); });
+            c.classList.add("sel");
+            state.fuel = c.dataset.fuel;
+            fuelNext.disabled = false;
+          });
+        });
+        document.querySelectorAll("#brand-choices .chip").forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            chip.classList.toggle("sel");
+            var b = chip.dataset.brand;
+            var i = state.brands.indexOf(b);
+            if (i === -1) state.brands.push(b); else state.brands.splice(i, 1);
+          });
+        });
+
+        function finishOnboarding() {
+          state.onboarded = true;
+          persist();
+          renderStations();
+          show("map");
+        }
+
+        document.getElementById("redo-onboarding").addEventListener("click", function () {
+          gotoStep(0);
+          document.querySelectorAll("#fuel-choices .choice").forEach(function (x) {
+            x.classList.toggle("sel", x.dataset.fuel === state.fuel);
+          });
+          fuelNext.disabled = false;
+          document.querySelectorAll("#brand-choices .chip").forEach(function (chip) {
+            chip.classList.toggle("sel", state.brands.indexOf(chip.dataset.brand) !== -1);
+          });
+          show("onboarding");
+        });
+
+        // ---------- pricing ----------
+        var currentFuel = state.fuel;
+        var listEl = document.getElementById("station-list");
+        var avgEl = document.getElementById("avg-val");
+        function renderStations() {
+          currentFuel = currentFuel || state.fuel;
+          Array.prototype.forEach.call(document.querySelectorAll("#fuel-seg button"), function (b) {
+            b.classList.toggle("on", b.dataset.fuel === currentFuel);
+          });
+          avgEl.textContent = REGIONAL_AVG[currentFuel].toFixed(1);
+          var rows = STATIONS.slice().sort(function (a, b) {
+            var fa = state.brands.indexOf(a.brand) !== -1 ? 0 : 1;
+            var fb = state.brands.indexOf(b.brand) !== -1 ? 0 : 1;
+            if (fa !== fb) return fa - fb;
+            return a.prices[currentFuel] - b.prices[currentFuel];
+          });
+          var min = Math.min.apply(null, STATIONS.map(function (s) { return s.prices[currentFuel]; }));
+          listEl.innerHTML = rows.map(function (s) {
+            var p = s.prices[currentFuel];
+            var low = p === min;
+            var fav = state.brands.indexOf(s.brand) !== -1;
+            var initials = s.brand.slice(0, 2);
+            return (
+              '<div class="station">' +
+                '<div class="logo">' + initials + "</div>" +
+                '<div class="info">' +
+                  '<div class="n">' + s.name + (fav ? " ★" : "") + "</div>" +
+                  '<div class="d">' + s.dist.toFixed(1) + " km · " + FUEL_LABEL[currentFuel] + "</div>" +
+                "</div>" +
+                '<div class="pr">' +
+                  '<div class="p' + (low ? " low" : "") + '">' + p.toFixed(1) + "</div>" +
+                  (low ? '<div class="tag">CHEAPEST</div>' : "") +
+                "</div>" +
+              "</div>"
+            );
+          }).join("");
+        }
+        Array.prototype.forEach.call(document.querySelectorAll("#fuel-seg button"), function (b) {
+          b.addEventListener("click", function () { currentFuel = b.dataset.fuel; renderStations(); });
+        });
+
+        // ---------- settings ----------
+        function renderSettings() {
+          document.getElementById("set-fuel").textContent = FUEL_LABEL[state.fuel];
+          var box = document.getElementById("set-brands");
+          if (!state.brands.length) {
+            box.innerHTML = '<span class="pill empty">None selected</span>';
+          } else {
+            box.innerHTML = state.brands.map(function (b) { return '<span class="pill">' + b + "</span>"; }).join("");
+          }
+        }
+        document.querySelectorAll("[data-toggle]").forEach(function (sw) {
+          sw.addEventListener("click", function () { sw.classList.toggle("on"); });
+        });
+
+        // ---------- boot ----------
+        if (state.onboarded) {
+          show("map");
+        } else {
+          gotoStep(0);
+          show("onboarding");
+        }
+        renderStations();
+
+        // ---------- PWA: service worker + install ----------
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/sw.js").catch(function (e) {
+              console.warn("SW registration failed", e);
+            });
+          });
+        }
+        var deferredPrompt = null;
+        var toast = document.getElementById("install-toast");
+        window.addEventListener("beforeinstallprompt", function (e) {
+          e.preventDefault();
+          deferredPrompt = e;
+          toast.classList.add("show");
+        });
+        document.getElementById("install-btn").addEventListener("click", function () {
+          toast.classList.remove("show");
+          if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+        });
+        document.getElementById("install-x").addEventListener("click", function () {
+          toast.classList.remove("show");
+        });
+      })();
     </script>
   </body>
 </html>
