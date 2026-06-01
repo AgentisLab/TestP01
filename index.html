@@ -137,17 +137,64 @@
         box-shadow: var(--shadow); margin-bottom: 16px;
       }
       .road { position: absolute; background: #fff; box-shadow: 0 0 0 1px #e2e8f0; }
-      .pin { position: absolute; transform: translate(-50%, -100%); cursor: pointer; }
-      .pin .dot { width: 16px; height: 16px; border-radius: 99px; background: var(--brand); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(2,6,23,.3); margin: 0 auto; }
-      .pin.cheap .dot { background: var(--good); }
-      /* SET1-C5: dot + smart callout */
-      .callout {
-        position: absolute; transform: translate(-50%, -100%); margin-top: -8px;
-        background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 8px 10px; white-space: nowrap;
-        font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px;
+      #map-markers { position: absolute; inset: 0; }
+
+      /* ===== Price-Hero marker (LOCKED SPEC: brand logo + price ¢/L — NO generic dots) ===== */
+      .ph-pin { position: absolute; transform: translate(-50%, -100%); cursor: pointer; z-index: 3; }
+      .ph-bubble {
+        position: relative; background: #fff; border-radius: 13px; box-shadow: var(--shadow);
+        padding: 7px 11px; display: flex; align-items: baseline; gap: 3px; white-space: nowrap;
+        font-family: "Space Grotesk", "Inter", sans-serif;
       }
-      .callout .price { color: var(--good); }
-      .callout::after { content: ""; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #fff; }
+      .ph-bubble .int { font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+      .ph-bubble .dec { font-size: 13px; font-weight: 700; color: var(--ink); }
+      .ph-bubble .unit { font-size: 10px; font-weight: 700; color: var(--muted); font-family: "Inter", sans-serif; margin-left: 3px; }
+      .ph-pin.cheap .ph-bubble .int, .ph-pin.cheap .ph-bubble .dec { color: var(--good); }
+      .ph-bubble::after { content: ""; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #fff; }
+      .ph-stem { width: 9px; height: 9px; border-radius: 99px; background: var(--brand); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(2,6,23,.4); margin: 1px auto 0; }
+      .ph-pin.cheap .ph-stem { background: var(--good); }
+      /* brand avatar rides the corner */
+      .ph-avatar {
+        position: absolute; top: -12px; right: -10px; width: 26px; height: 26px; border-radius: 99px;
+        border: 2px solid #fff; box-shadow: 0 2px 5px rgba(2,6,23,.3); display: grid; place-items: center;
+        font-size: 11px; font-weight: 800; font-family: "Inter", sans-serif; letter-spacing: -.02em;
+      }
+      .ph-fav { position: absolute; top: -11px; left: -7px; font-size: 13px; line-height: 1; }
+
+      /* ===== Cluster pin — REST state (count + "dès" price) ===== */
+      .cluster-pin { position: absolute; transform: translate(-50%, -50%); cursor: pointer; display: flex; flex-direction: column; align-items: center; z-index: 2; }
+      .cluster-circle { width: 50px; height: 50px; border-radius: 99px; background: var(--brand); color: #fff; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(2,6,23,.3); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+      .cluster-circle b { font-size: 18px; font-weight: 800; font-family: "Space Grotesk", sans-serif; }
+      .cluster-circle small { font-size: 8px; font-weight: 700; opacity: .9; letter-spacing: .04em; margin-top: 1px; }
+      .cluster-tip { margin-top: 5px; background: #fff; color: var(--good); font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 99px; box-shadow: 0 2px 5px rgba(2,6,23,.2); white-space: nowrap; font-family: "Space Grotesk", sans-serif; }
+      .cluster-tip small { color: var(--muted); font-weight: 700; font-size: 9px; }
+
+      /* expanded (A) affordances: collapse + co-located → sheet */
+      .cluster-collapse { position: absolute; left: 10px; top: 10px; z-index: 6; background: rgba(255,255,255,.95); border: 0; box-shadow: var(--shadow); border-radius: 99px; padding: 7px 12px; font: 600 12px "Inter", sans-serif; color: var(--brand-ink); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+      .colocated-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; background: var(--ink); color: #fff; border: 0; border-radius: 99px; padding: 8px 14px; font: 600 12px "Inter", sans-serif; cursor: pointer; box-shadow: var(--shadow); white-space: nowrap; }
+      [hidden] { display: none !important; }
+
+      /* ===== Bottom-sheet sublist (B) ===== */
+      .sheet-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.34); z-index: 40; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+      .sheet-backdrop.show { opacity: 1; pointer-events: auto; }
+      .bottom-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -8px 28px rgba(2,6,23,.22); z-index: 41; transform: translateY(100%); transition: transform .22s ease; }
+      .bottom-sheet.show { transform: translateY(0); }
+      .sheet-grab { width: 38px; height: 5px; border-radius: 99px; background: var(--line); margin: 8px auto 6px; cursor: pointer; }
+      .sheet-head { display: flex; align-items: baseline; gap: 8px; padding: 4px 18px 12px; border-bottom: 1px solid var(--line); }
+      .sheet-head b { font-size: 16px; font-weight: 700; font-family: "Space Grotesk", sans-serif; }
+      .sheet-head span { font-size: 13px; color: var(--muted); margin-left: auto; }
+      .sheet-list { max-height: 232px; overflow-y: auto; }
+      .sheet-row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--line); }
+      .sheet-row:last-child { border-bottom: 0; }
+      .sheet-row.best { background: var(--good-soft); }
+      .sheet-row .nm { font-weight: 600; font-size: 14px; }
+      .sheet-row .ds { font-size: 12px; color: var(--muted); }
+      .sheet-row.best .ds { color: var(--good); font-weight: 600; }
+      .sheet-row .pr { margin-left: auto; text-align: right; font-family: "Space Grotesk", sans-serif; }
+      .sheet-row .pr b { font-size: 17px; font-weight: 700; }
+      .sheet-row.best .pr b { color: var(--good); }
+      .sheet-row .pr .u { font-size: 10px; color: var(--muted); font-weight: 700; }
+      .tag-best { font-size: 9px; font-weight: 800; color: #fff; background: var(--good); padding: 1px 6px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
       .map-fab { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 12px; background: #fff; box-shadow: var(--shadow); display: grid; place-items: center; border: 0; cursor: pointer; }
 
       /* mini-card hero (SET1-C5 expanded) */
@@ -288,18 +335,28 @@
           <div class="map-canvas" id="map-canvas">
             <div class="road" style="left:0; right:0; top:46%; height:10px;"></div>
             <div class="road" style="top:0; bottom:0; left:38%; width:10px;"></div>
-            <!-- cheapest hero with smart callout (SET1-C5) -->
-            <div class="callout" style="left:38%; top:30%;">
-              <span class="brand-dot">●</span> Costco <span class="price">158.9</span>
-            </div>
-            <div class="pin cheap" style="left:38%; top:38%;"><div class="dot"></div></div>
-            <!-- satellite pins -->
-            <div class="pin" style="left:64%; top:60%;"><div class="dot"></div></div>
-            <div class="pin" style="left:22%; top:66%;"><div class="dot"></div></div>
-            <div class="pin" style="left:74%; top:30%;"><div class="dot"></div></div>
+
+            <!-- Price-Hero pins + cluster (rendered by JS) -->
+            <div id="map-markers"></div>
+
+            <!-- expanded (A) affordances -->
+            <button class="cluster-collapse" id="cluster-collapse" hidden>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              Regrouper
+            </button>
+            <button class="colocated-hint" id="colocated-hint" hidden>Même sortie · voir la liste</button>
+
             <button class="map-fab" title="Recenter" aria-label="Recenter">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
             </button>
+
+            <!-- bottom-sheet sublist (B) -->
+            <div class="sheet-backdrop" id="sheet-backdrop"></div>
+            <div class="bottom-sheet" id="bottom-sheet" role="dialog" aria-modal="true" aria-label="Stations at this exit">
+              <div class="sheet-grab" id="sheet-grab"></div>
+              <div class="sheet-head"><b id="sheet-title">Sortie</b> <span id="sheet-count">0 stations</span></div>
+              <div class="sheet-list" id="sheet-list"></div>
+            </div>
           </div>
 
           <!-- mini-card hero -->
@@ -454,6 +511,7 @@
           }
           if (name === "settings") renderSettings();
           if (name === "pricing") renderStations();
+          if (name === "map") renderMap();
         }
 
         Array.prototype.forEach.call(tabbar.querySelectorAll("button"), function (b) {
@@ -574,6 +632,130 @@
           sw.addEventListener("click", function () { sw.classList.toggle("on"); });
         });
 
+        // ---------- map: Price-Hero pins + cluster A→B ----------
+        // Brand-coloured avatars (real brand SVGs pending; colour + mark per UIUX render).
+        var BRAND_STYLE = {
+          "Costco":       { bg: "#005daa", fg: "#ffffff", mark: "C" },
+          "Petro-Canada": { bg: "#d81e26", fg: "#ffffff", mark: "P" },
+          "Esso":         { bg: "#1f4e9b", fg: "#ffffff", mark: "E" },
+          "Shell":        { bg: "#f5c20a", fg: "#7a3b00", mark: "S" },
+          "Ultramar":     { bg: "#003da5", fg: "#ffffff", mark: "U" },
+          "Couche-Tard":  { bg: "#e8511b", fg: "#ffffff", mark: "CT" }
+        };
+        function brandStyle(b) { return BRAND_STYLE[b] || { bg: "#0284c7", fg: "#fff", mark: (b || "?").slice(0, 1) }; }
+
+        // Québec data only · ¢/L · km
+        var MAP_PINS = [
+          { brand: "Costco",       price: 158.9, x: 32, y: 30 },
+          { brand: "Petro-Canada", price: 161.9, x: 72, y: 28 },
+          { brand: "Shell",        price: 164.9, x: 78, y: 70 }
+        ];
+        var MAP_CLUSTER = {
+          exit: "Sortie 312 · A-20",
+          short: "Sortie 312",
+          x: 34, y: 64,
+          members: [
+            { brand: "Shell",    price: 162.9, dist: 0.2 },
+            { brand: "Esso",     price: 164.9, dist: 0.3 },
+            { brand: "Ultramar", price: 167.9, dist: 0.4 }
+          ],
+          fan: [ { dx: -17, dy: -16 }, { dx: 15, dy: -20 }, { dx: 5, dy: 12 } ]
+        };
+
+        function priceParts(p) { var s = p.toFixed(1).split("."); return { int: s[0], dec: s[1] }; }
+        function minPrice(arr) { return Math.min.apply(null, arr.map(function (m) { return m.price; })); }
+
+        function phPinHTML(pin, cheap) {
+          var st = brandStyle(pin.brand);
+          var pp = priceParts(pin.price);
+          var fav = state.brands.indexOf(pin.brand) !== -1;
+          return '<div class="ph-pin' + (cheap ? " cheap" : "") + '" style="left:' + pin.x + '%;top:' + pin.y + '%;" '
+            + 'role="button" tabindex="0" aria-label="' + pin.brand + " " + pin.price.toFixed(1) + ' cents per litre">'
+            + '<div class="ph-bubble">'
+            + (fav ? '<span class="ph-fav" title="Favorite">★</span>' : "")
+            + '<span class="ph-avatar" style="background:' + st.bg + ";color:" + st.fg + ';">' + st.mark + "</span>"
+            + '<span class="int">' + pp.int + '</span><span class="dec">.' + pp.dec + '</span><span class="unit">¢/L</span>'
+            + "</div>"
+            + '<div class="ph-stem"></div>'
+            + "</div>";
+        }
+        function clusterPinHTML() {
+          var min = minPrice(MAP_CLUSTER.members);
+          var pp = priceParts(min);
+          return '<div class="cluster-pin" id="cluster-pin" style="left:' + MAP_CLUSTER.x + "%;top:" + MAP_CLUSTER.y + '%;" '
+            + 'role="button" tabindex="0" aria-label="Cluster of ' + MAP_CLUSTER.members.length
+            + " stations, from " + min.toFixed(1) + ' cents per litre. Activate to expand.">'
+            + '<div class="cluster-circle"><b>' + MAP_CLUSTER.members.length + "</b><small>STA.</small></div>"
+            + '<div class="cluster-tip">dès ' + pp.int + "." + pp.dec + " <small>¢/L</small></div>"
+            + "</div>";
+        }
+
+        var clusterExpanded = false;
+        var mapMarkers = document.getElementById("map-markers");
+        var collapseBtn = document.getElementById("cluster-collapse");
+        var colocatedBtn = document.getElementById("colocated-hint");
+        var sheetBackdrop = document.getElementById("sheet-backdrop");
+        var sheetEl = document.getElementById("bottom-sheet");
+
+        function renderMap() {
+          if (clusterExpanded) {
+            // STATE A: cluster fanned into individual Price-Hero pins
+            var standMin = minPrice(MAP_PINS);
+            var memMin = minPrice(MAP_CLUSTER.members);
+            var html = MAP_PINS.map(function (p) { return phPinHTML(p, p.price === standMin); }).join("");
+            html += MAP_CLUSTER.members.map(function (m, i) {
+              var off = MAP_CLUSTER.fan[i] || { dx: 0, dy: 0 };
+              return phPinHTML({ brand: m.brand, price: m.price, x: MAP_CLUSTER.x + off.dx, y: MAP_CLUSTER.y + off.dy }, m.price === memMin);
+            }).join("");
+            mapMarkers.innerHTML = html;
+            collapseBtn.hidden = false;
+            colocatedBtn.hidden = false;
+          } else {
+            // REST: standalone Price-Hero pins + cluster bubble
+            var overallMin = minPrice(MAP_PINS);
+            var rest = MAP_PINS.map(function (p) { return phPinHTML(p, p.price === overallMin); }).join("");
+            rest += clusterPinHTML();
+            mapMarkers.innerHTML = rest;
+            collapseBtn.hidden = true;
+            colocatedBtn.hidden = true;
+            closeSheet();
+            var cp = document.getElementById("cluster-pin");
+            if (cp) {
+              cp.addEventListener("click", expandCluster);
+              cp.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); expandCluster(); }
+              });
+            }
+          }
+        }
+        function expandCluster() { clusterExpanded = true; renderMap(); }
+        function collapseCluster() { clusterExpanded = false; renderMap(); }
+
+        function renderSheet() {
+          var min = minPrice(MAP_CLUSTER.members);
+          var rows = MAP_CLUSTER.members.slice().sort(function (a, b) { return a.price - b.price; });
+          document.getElementById("sheet-title").textContent = MAP_CLUSTER.short;
+          document.getElementById("sheet-count").textContent = MAP_CLUSTER.members.length + " stations · " + min.toFixed(1) + " ¢/L";
+          document.getElementById("sheet-list").innerHTML = rows.map(function (m) {
+            var st = brandStyle(m.brand);
+            var pp = priceParts(m.price);
+            var best = m.price === min;
+            return '<div class="sheet-row' + (best ? " best" : "") + '">'
+              + '<span class="ph-avatar" style="position:static;width:30px;height:30px;border:0;box-shadow:none;flex:none;background:' + st.bg + ";color:" + st.fg + ';">' + st.mark + "</span>"
+              + "<div><div class=\"nm\">" + m.brand + " — " + MAP_CLUSTER.short + (best ? '<span class="tag-best">CHEAPEST</span>' : "") + "</div>"
+              + '<div class="ds">' + m.dist.toFixed(1) + " km" + (best ? " · le moins cher" : "") + "</div></div>"
+              + '<div class="pr"><b>' + pp.int + "." + pp.dec + '</b> <span class="u">¢/L</span></div>'
+              + "</div>";
+          }).join("");
+        }
+        function openSheet() { renderSheet(); sheetBackdrop.classList.add("show"); sheetEl.classList.add("show"); }
+        function closeSheet() { sheetBackdrop.classList.remove("show"); sheetEl.classList.remove("show"); }
+
+        collapseBtn.addEventListener("click", collapseCluster);
+        colocatedBtn.addEventListener("click", openSheet);
+        sheetBackdrop.addEventListener("click", closeSheet);
+        document.getElementById("sheet-grab").addEventListener("click", closeSheet);
+
         // ---------- boot ----------
         if (state.onboarded) {
           show("map");
@@ -582,6 +764,7 @@
           show("onboarding");
         }
         renderStations();
+        renderMap();
 
         // ---------- PWA: service worker + install ----------
         if ("serviceWorker" in navigator) {
