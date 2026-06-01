@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="GasDashboard — BI view of Quebec fuel-price trends across regions and brands." />
+    <title>GasDashboard · Quebec fuel-price BI</title>
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">⛽</span>
+        <div>
+          <div class="wordmark">GasDashboard</div>
+          <div class="tagline">Quebec fuel-price intelligence · <span id="range-note">—</span></div>
+        </div>
+      </div>
+      <div class="brandby">by agentisLab<span class="dot">.</span></div>
+    </header>
+
+    <main id="root">
+      <section class="controls" id="controls" hidden>
+        <div class="ctl">
+          <label for="fuel-sel">Fuel grade</label>
+          <div class="seg" id="fuel-seg" role="tablist"></div>
+        </div>
+        <div class="ctl">
+          <label for="region-sel">Brand breakdown region</label>
+          <select id="region-sel"></select>
+        </div>
+        <div class="ctl">
+          <label>Date range</label>
+          <div class="range">
+            <select id="start-sel" aria-label="Start date"></select>
+            <span class="to">→</span>
+            <select id="end-sel" aria-label="End date"></select>
+            <div class="presets" id="presets">
+              <button data-days="7">7d</button>
+              <button data-days="14">14d</button>
+              <button data-days="30" class="on">30d</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="kpis" id="kpis"></section>
+
+      <section class="grid">
+        <div class="panel wide">
+          <div class="phead"><h2>Price trend by region</h2><span class="cap" id="trend-cap">—</span></div>
+          <div id="trend-chart" class="chart-host"></div>
+          <div class="legend" id="trend-legend"></div>
+        </div>
+        <div class="panel">
+          <div class="phead"><h2>Regional comparison</h2><span class="cap" id="region-cap">avg over range</span></div>
+          <div id="region-chart" class="chart-host"></div>
+        </div>
+        <div class="panel">
+          <div class="phead"><h2>Brand comparison</h2><span class="cap" id="brand-cap">—</span></div>
+          <div id="brand-chart" class="chart-host"></div>
+        </div>
+      </section>
+
+      <div class="state-msg" id="loading">Loading price history…</div>
+    </main>
+
+    <footer class="foot">
+      <span>Data: <code id="data-src">data/prices.json</code> · seeded representative history · ¢/L (CAD)</span>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
