@@ -22,6 +22,11 @@ window.APP_CONFIG = Object.assign(
     API_FALLBACK_URL: "",   // failover: direct source API
     AUTH_TOKEN: "",         // bearer token for historian/API (build-injected)
 
+    // --- Price-alert push API (server built separately) ---
+    // Base URL for the Web Push price-alert endpoints (see /v1/push/* and /v1/alerts).
+    // Empty => same origin (relative fetches). Build-injected in deploy if hosted elsewhere.
+    ALERTS_API_BASE: "",
+
     // --- Live map layer (Google Maps JS API) ---
     GOOGLE_MAPS_API_KEY_WEB: "", // referrer-restricted browser key (build-injected)
     MAP_CENTER: { lat: 46.8065, lng: -71.2451 }, // Québec City

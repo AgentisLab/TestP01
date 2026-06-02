@@ -239,6 +239,32 @@
       .pill { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-ink); }
       .pill.empty { background: var(--bg); color: var(--muted); }
 
+      /* ===== Price alerts ===== */
+      .field { padding: 4px 16px 14px; }
+      .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+      .field input, .field select { width: 100%; appearance: none; font-family: inherit; font-size: 15px; color: var(--ink);
+        background: var(--surface); border: 0; box-shadow: inset 0 0 0 1.5px var(--line); border-radius: 10px; padding: 11px 12px; }
+      .field input:focus, .field select:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--brand); }
+      .field select[multiple] { height: 108px; padding: 6px; }
+      .field .hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 6px; text-transform: none; letter-spacing: 0; }
+      .alert-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+      .alert-row:first-of-type { border-top: 0; }
+      .alert-row .info { min-width: 0; }
+      .alert-row .info .t { font-weight: 600; }
+      .alert-row .info .s { font-size: 13px; color: var(--muted); }
+      .alert-row .acts { margin-left: auto; display: flex; gap: 6px; flex: none; }
+      .alert-row .acts button { border: 0; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px;
+        padding: 6px 10px; border-radius: 8px; background: var(--bg); color: var(--brand-ink); }
+      .alert-row .acts button.danger { color: var(--warn); }
+      .alert-row .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px;
+        background: var(--brand-soft); color: var(--brand-ink); margin-right: 6px; }
+      .alert-row .badge.off { background: var(--bg); color: var(--muted); }
+      .form-actions { padding: 4px 16px 16px; display: flex; gap: 8px; }
+      .form-actions .btn { font-size: 14px; padding: 11px 14px; }
+      .notice { font-size: 13px; color: var(--muted); padding: 4px 16px 14px; }
+      .notice.warn { color: var(--warn); }
+      [hidden] { display: none !important; }
+
       /* ===== Analytics ===== */
       .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
       .stat { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 14px; }
@@ -453,6 +479,79 @@
             <div class="item">
               <div><div class="t">Weekly summary</div><div class="s">Best day to fill up</div></div>
               <div class="switch" data-toggle></div>
+            </div>
+          </div>
+
+          <!-- ===== Price alerts (Web Push) ===== -->
+          <div class="group" id="alerts-group">
+            <div class="gh">Price alerts</div>
+            <div class="item">
+              <div><div class="t">Enable price-alert notifications</div><div class="s" id="al-toggle-sub">Get pushed when prices match your rules</div></div>
+              <div class="switch" id="al-enable" role="switch" aria-checked="false" tabindex="0"></div>
+            </div>
+            <div class="notice warn" id="al-unsupported" hidden>Push notifications aren't supported on this browser.</div>
+            <div class="notice" id="al-status" hidden></div>
+
+            <!-- Alert list + create form (only meaningful once enabled) -->
+            <div id="al-panel" hidden>
+              <div id="al-list"><div class="notice" id="al-empty">No alerts yet.</div></div>
+
+              <div class="gh" style="border-top:1px solid var(--line)">Create alert</div>
+              <div class="field">
+                <label for="al-kind">Alert type</label>
+                <select id="al-kind">
+                  <option value="threshold">Price threshold</option>
+                  <option value="geofence">Nearby deal (geofence)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="al-fuel">Fuel</label>
+                <select id="al-fuel">
+                  <option value="regular">Regular</option>
+                  <option value="super">Super</option>
+                  <option value="diesel">Diesel</option>
+                </select>
+              </div>
+
+              <!-- threshold-only fields -->
+              <div class="field" data-kind="threshold">
+                <label for="al-threshold">Threshold price (¢/L)</label>
+                <input id="al-threshold" type="number" inputmode="decimal" min="0" step="0.1" placeholder="e.g. 159.9" />
+                <div class="hint">Alert when a station drops below this price.</div>
+              </div>
+              <div class="field" data-kind="threshold">
+                <label for="al-station">Station</label>
+                <select id="al-station">
+                  <option value="">Any of my watched stations…</option>
+                </select>
+                <div class="hint">Pick one station, or choose "Any" and select several below.</div>
+              </div>
+              <div class="field" data-kind="threshold" id="al-stations-multi-wrap" hidden>
+                <label for="al-stations">Watched stations</label>
+                <select id="al-stations" multiple></select>
+                <div class="hint">Ctrl/Cmd-click to select multiple.</div>
+              </div>
+
+              <!-- geofence-only fields -->
+              <div class="field" data-kind="geofence" hidden>
+                <label for="al-radius">Radius (km)</label>
+                <input id="al-radius" type="number" inputmode="decimal" min="0.5" step="0.5" value="5" />
+              </div>
+              <div class="field" data-kind="geofence" hidden>
+                <label for="al-delta">Cheaper than local avg by (¢/L)</label>
+                <input id="al-delta" type="number" inputmode="decimal" min="0" step="0.5" value="3" />
+              </div>
+              <div class="field" data-kind="geofence" hidden>
+                <label for="al-region">Region</label>
+                <input id="al-region" type="text" placeholder="auto-detected from your location" readonly />
+                <div class="hint">Law 25: your GPS coordinates stay on this device — only a coarse region name is sent.</div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn" id="al-create">Add alert</button>
+                <button class="btn secondary" id="al-cancel" hidden>Cancel edit</button>
+              </div>
+              <div class="notice" id="al-form-msg" hidden></div>
             </div>
           </div>
 
@@ -1009,6 +1108,402 @@
         Array.prototype.forEach.call(document.querySelectorAll("#an-fuel-seg button"), function (b) {
           b.addEventListener("click", function () { anFuel = b.dataset.fuel; renderAnalytics(); });
         });
+
+        // ---------- price alerts (Web Push) ----------
+        // Talks to the separately-built server API. Response envelopes:
+        //   success { data: ... }   error { error: { code, message } }
+        // LAW 25 / PRIVACY: precise GPS coordinates NEVER leave this device. For
+        // geofence alerts we read navigator.geolocation locally, derive only a
+        // COARSE region label, and send {region, radius_km, delta_cents} — no lat/lng.
+        var Alerts = (function () {
+          var CFG = window.APP_CONFIG || {};
+          var SUB_KEY = "alerts.subscription_id";
+          // Trailing-slash-safe base; "" => same origin (relative URLs).
+          var BASE = (CFG.ALERTS_API_BASE || "").replace(/\/+$/, "");
+
+          var supported = ("serviceWorker" in navigator) &&
+            ("PushManager" in window) && ("Notification" in window);
+
+          // Known stations for the picker. station_key is a stable slug derived
+          // from brand + name (favorites don't exist in this app yet).
+          function slug(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
+          var KNOWN_STATIONS = (typeof STATIONS !== "undefined" ? STATIONS : []).map(function (s) {
+            return { station_key: slug(s.brand) + "-" + slug(s.name), label: s.brand + " — " + s.name };
+          });
+
+          // --- VAPID applicationServerKey helper (base64url -> Uint8Array) ---
+          function urlBase64ToUint8Array(base64String) {
+            var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+            var base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+            var raw = window.atob(base64);
+            var out = new Uint8Array(raw.length);
+            for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+            return out;
+          }
+
+          // --- envelope-aware fetch; always rejects with an Error on failure ---
+          function api(path, opts) {
+            opts = opts || {};
+            opts.headers = Object.assign({ "Content-Type": "application/json", "Accept": "application/json" }, opts.headers || {});
+            return fetch(BASE + path, opts).then(function (r) {
+              return r.json().catch(function () { return {}; }).then(function (body) {
+                if (!r.ok || (body && body.error)) {
+                  var msg = (body && body.error && body.error.message) || ("HTTP " + r.status);
+                  throw new Error(msg);
+                }
+                return body && body.data;
+              });
+            });
+          }
+
+          function getSubId() { try { return localStorage.getItem(SUB_KEY) || null; } catch (e) { return null; } }
+          function setSubId(v) { try { if (v) localStorage.setItem(SUB_KEY, v); else localStorage.removeItem(SUB_KEY); } catch (e) {} }
+
+          // --- subscribe flow: permission -> SW -> pushManager -> POST ---
+          function enable() {
+            if (!supported) return Promise.reject(new Error("not supported"));
+            return Notification.requestPermission().then(function (perm) {
+              if (perm !== "granted") throw new Error("Notification permission denied.");
+              return navigator.serviceWorker.register("/sw.js").then(function () {
+                return navigator.serviceWorker.ready;
+              });
+            }).then(function (reg) {
+              return reg.pushManager.getSubscription().then(function (existing) {
+                if (existing) return existing;
+                return api("/v1/push/vapid-public-key", { method: "GET" }).then(function (data) {
+                  var key = data && data.public_key;
+                  if (!key) throw new Error("Server did not return a VAPID key.");
+                  return reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(key)
+                  });
+                });
+              });
+            }).then(function (sub) {
+              return api("/v1/push/subscribe", {
+                method: "POST",
+                body: JSON.stringify({ subscription: sub.toJSON(), ua: navigator.userAgent })
+              }).then(function (data) {
+                if (data && data.subscription_id) setSubId(data.subscription_id);
+                return data;
+              });
+            });
+          }
+
+          // --- unsubscribe flow: pushManager.unsubscribe + DELETE ---
+          function disable() {
+            if (!supported) return Promise.resolve();
+            return navigator.serviceWorker.getRegistration().then(function (reg) {
+              if (!reg) return null;
+              return reg.pushManager.getSubscription();
+            }).then(function (sub) {
+              if (!sub) { setSubId(null); return; }
+              var endpoint = sub.endpoint;
+              return sub.unsubscribe().catch(function () {}).then(function () {
+                return api("/v1/push/subscribe", {
+                  method: "DELETE",
+                  body: JSON.stringify({ endpoint: endpoint })
+                }).catch(function () { /* server cleanup best-effort */ });
+              }).then(function () { setSubId(null); });
+            });
+          }
+
+          function isEnabled() {
+            if (!supported) return Promise.resolve(false);
+            return navigator.serviceWorker.getRegistration().then(function (reg) {
+              if (!reg) return false;
+              return reg.pushManager.getSubscription().then(function (s) { return !!s && !!getSubId(); });
+            }).catch(function () { return false; });
+          }
+
+          // --- alert CRUD ---
+          function list() {
+            var id = getSubId();
+            if (!id) return Promise.resolve([]);
+            return api("/v1/alerts?subscription_id=" + encodeURIComponent(id), { method: "GET" });
+          }
+          function create(fields) {
+            var id = getSubId();
+            if (!id) return Promise.reject(new Error("Enable notifications first."));
+            fields.subscription_id = id;
+            return api("/v1/alerts", { method: "POST", body: JSON.stringify(fields) });
+          }
+          function update(alertId, fields) {
+            return api("/v1/alerts/" + encodeURIComponent(alertId), { method: "PATCH", body: JSON.stringify(fields) });
+          }
+          function remove(alertId) {
+            return api("/v1/alerts/" + encodeURIComponent(alertId), { method: "DELETE" });
+          }
+
+          // --- coarse region from geolocation (coordinates stay local) ---
+          // Resolves to a region string only; never resolves coordinates upward.
+          function currentRegion() {
+            return new Promise(function (resolve) {
+              if (!navigator.geolocation) { resolve(CFG.DEFAULT_REGION || "Québec"); return; }
+              navigator.geolocation.getCurrentPosition(function (pos) {
+                // Derive a COARSE label locally. We deliberately reduce precision so
+                // nothing sensitive is transmitted; the lat/lng object is discarded here.
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                resolve(coarseRegion(lat, lng));
+              }, function () {
+                resolve(CFG.DEFAULT_REGION || "Québec");
+              }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+            });
+          }
+          // Map coordinates to a coarse, non-identifying region label (client-side).
+          function coarseRegion(lat, lng) {
+            if (!isFinite(lat) || !isFinite(lng)) return CFG.DEFAULT_REGION || "Québec";
+            // ~0.5° grid keeps it city-scale, not address-scale. Region name only is sent.
+            if (lat > 46.5 && lat < 47.2 && lng > -71.7 && lng < -71.0) return "Québec";
+            return "lat" + (Math.round(lat * 2) / 2) + ",lng" + (Math.round(lng * 2) / 2);
+          }
+
+          return {
+            supported: supported,
+            KNOWN_STATIONS: KNOWN_STATIONS,
+            enable: enable, disable: disable, isEnabled: isEnabled,
+            list: list, create: create, update: update, remove: remove,
+            currentRegion: currentRegion, getSubId: getSubId
+          };
+        })();
+
+        // ---------- alerts UI wiring ----------
+        (function () {
+          var els = {
+            enable: document.getElementById("al-enable"),
+            toggleSub: document.getElementById("al-toggle-sub"),
+            unsupported: document.getElementById("al-unsupported"),
+            status: document.getElementById("al-status"),
+            panel: document.getElementById("al-panel"),
+            list: document.getElementById("al-list"),
+            kind: document.getElementById("al-kind"),
+            fuel: document.getElementById("al-fuel"),
+            threshold: document.getElementById("al-threshold"),
+            station: document.getElementById("al-station"),
+            stationsMultiWrap: document.getElementById("al-stations-multi-wrap"),
+            stations: document.getElementById("al-stations"),
+            radius: document.getElementById("al-radius"),
+            delta: document.getElementById("al-delta"),
+            region: document.getElementById("al-region"),
+            create: document.getElementById("al-create"),
+            cancel: document.getElementById("al-cancel"),
+            formMsg: document.getElementById("al-form-msg")
+          };
+          var editingId = null;
+
+          function setNotice(el, msg, isWarn) {
+            if (!msg) { el.hidden = true; el.textContent = ""; return; }
+            el.hidden = false; el.textContent = msg;
+            el.classList.toggle("warn", !!isWarn);
+          }
+
+          // Populate station pickers once.
+          (function populateStations() {
+            var opts = Alerts.KNOWN_STATIONS.map(function (s) {
+              return '<option value="' + s.station_key + '">' + s.label + "</option>";
+            }).join("");
+            els.station.insertAdjacentHTML("beforeend", opts);
+            els.stations.innerHTML = opts;
+          })();
+
+          // Show fields relevant to the chosen kind.
+          function applyKind() {
+            var kind = els.kind.value;
+            Array.prototype.forEach.call(document.querySelectorAll("#al-panel [data-kind]"), function (f) {
+              f.hidden = f.getAttribute("data-kind") !== kind;
+            });
+            // multi-select only matters when "Any" is chosen for threshold.
+            if (kind === "threshold") {
+              els.stationsMultiWrap.hidden = !!els.station.value; // hide multi when a single station is picked
+            }
+          }
+          els.kind.addEventListener("change", applyKind);
+          els.station.addEventListener("change", function () {
+            els.stationsMultiWrap.hidden = !!els.station.value;
+          });
+
+          function renderList(alerts) {
+            if (!alerts || !alerts.length) {
+              els.list.innerHTML = '<div class="notice" id="al-empty">No alerts yet.</div>';
+              return;
+            }
+            els.list.innerHTML = alerts.map(function (a) {
+              var desc;
+              if (a.kind === "threshold") {
+                var where = a.station_key ? "1 station"
+                  : (a.station_keys && a.station_keys.length ? a.station_keys.length + " stations" : "any station");
+                desc = "Below " + fmtCents(a.threshold_cents) + " ¢/L · " + where;
+              } else {
+                desc = (a.delta_cents || 0) + "¢ under avg · " + (a.radius_km || "?") + " km · " + (a.region || "—");
+              }
+              var badge = a.active === false
+                ? '<span class="badge off">off</span>'
+                : '<span class="badge">' + a.kind + "</span>";
+              return '<div class="alert-row" data-id="' + a.id + '">'
+                + '<div class="info"><div class="t">' + badge + cap(a.gas_type) + "</div>"
+                + '<div class="s">' + desc + "</div></div>"
+                + '<div class="acts">'
+                + '<button data-act="edit">Edit</button>'
+                + '<button data-act="del" class="danger">Delete</button>'
+                + "</div></div>";
+            }).join("");
+          }
+          function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
+          function fmtCents(c) { return (c == null ? "?" : Number(c).toFixed(1)); }
+
+          function refresh() {
+            return Alerts.list().then(renderList).catch(function (e) {
+              setNotice(els.status, "Couldn't load alerts: " + e.message, true);
+            });
+          }
+
+          // toggle visual state helper
+          function setToggle(on) {
+            els.enable.classList.toggle("on", !!on);
+            els.enable.setAttribute("aria-checked", on ? "true" : "false");
+            els.panel.hidden = !on;
+          }
+
+          // Build payload from the form for the current kind.
+          function readForm() {
+            var kind = els.kind.value;
+            var f = { kind: kind, gas_type: els.fuel.value };
+            if (kind === "threshold") {
+              var t = parseFloat(els.threshold.value);
+              if (isFinite(t)) f.threshold_cents = t;
+              if (els.station.value) {
+                f.station_key = els.station.value;
+              } else {
+                var picked = Array.prototype.map.call(els.stations.selectedOptions, function (o) { return o.value; });
+                if (picked.length) f.station_keys = picked;
+              }
+            } else {
+              var r = parseFloat(els.radius.value), d = parseFloat(els.delta.value);
+              if (isFinite(r)) f.radius_km = r;
+              if (isFinite(d)) f.delta_cents = d;
+              // region is filled from the device-local coarse region (see submit()).
+              if (els.region.value) f.region = els.region.value;
+            }
+            return f;
+          }
+
+          function resetForm() {
+            editingId = null;
+            els.create.textContent = "Add alert";
+            els.cancel.hidden = true;
+            els.threshold.value = "";
+            els.station.value = "";
+            Array.prototype.forEach.call(els.stations.options, function (o) { o.selected = false; });
+            els.region.value = "";
+            applyKind();
+          }
+
+          els.cancel.addEventListener("click", function () { resetForm(); setNotice(els.formMsg, ""); });
+
+          function submit() {
+            setNotice(els.formMsg, "");
+            els.create.disabled = true;
+            // For geofence: resolve the COARSE region locally first (Law 25 — no coords sent).
+            var pre = els.kind.value === "geofence"
+              ? Alerts.currentRegion().then(function (region) { els.region.value = region; })
+              : Promise.resolve();
+
+            pre.then(function () {
+              var fields = readForm();
+              var op = editingId ? Alerts.update(editingId, fields) : Alerts.create(fields);
+              return op;
+            }).then(function () {
+              resetForm();
+              return refresh();
+            }).then(function () {
+              setNotice(els.formMsg, "Saved.");
+            }).catch(function (e) {
+              setNotice(els.formMsg, "Couldn't save: " + e.message, true);
+            }).then(function () { els.create.disabled = false; });
+          }
+          els.create.addEventListener("click", submit);
+
+          // list edit/delete (event delegation)
+          els.list.addEventListener("click", function (ev) {
+            var btn = ev.target.closest && ev.target.closest("button[data-act]");
+            if (!btn) return;
+            var row = btn.closest(".alert-row");
+            var id = row && row.getAttribute("data-id");
+            if (!id) return;
+            if (btn.getAttribute("data-act") === "del") {
+              Alerts.remove(id).then(refresh).catch(function (e) {
+                setNotice(els.status, "Delete failed: " + e.message, true);
+              });
+            } else {
+              startEdit(id);
+            }
+          });
+
+          function startEdit(id) {
+            Alerts.list().then(function (alerts) {
+              var a = alerts.filter(function (x) { return String(x.id) === String(id); })[0];
+              if (!a) return;
+              editingId = id;
+              els.kind.value = a.kind;
+              els.fuel.value = a.gas_type || "regular";
+              if (a.kind === "threshold") {
+                els.threshold.value = a.threshold_cents != null ? a.threshold_cents : "";
+                els.station.value = a.station_key || "";
+                Array.prototype.forEach.call(els.stations.options, function (o) {
+                  o.selected = !!(a.station_keys && a.station_keys.indexOf(o.value) !== -1);
+                });
+              } else {
+                els.radius.value = a.radius_km != null ? a.radius_km : "";
+                els.delta.value = a.delta_cents != null ? a.delta_cents : "";
+                els.region.value = a.region || "";
+              }
+              applyKind();
+              els.create.textContent = "Save changes";
+              els.cancel.hidden = false;
+              els.panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }).catch(function () {});
+          }
+
+          // --- main enable/disable toggle ---
+          els.enable.addEventListener("click", onToggle);
+          els.enable.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); }
+          });
+          var busy = false;
+          function onToggle() {
+            if (busy) return;
+            if (!Alerts.supported) return;
+            busy = true;
+            var turningOn = !els.enable.classList.contains("on");
+            setNotice(els.status, turningOn ? "Enabling…" : "Disabling…");
+            var op = turningOn ? Alerts.enable() : Alerts.disable();
+            op.then(function () {
+              setToggle(turningOn);
+              setNotice(els.status, "");
+              if (turningOn) return refresh();
+              renderList([]);
+            }).catch(function (e) {
+              setToggle(false);
+              setNotice(els.status, e.message || "Something went wrong.", true);
+            }).then(function () { busy = false; });
+          }
+
+          // --- init: graceful degradation + reflect current subscription state ---
+          if (!Alerts.supported) {
+            els.unsupported.hidden = false;
+            els.enable.classList.add("off");
+            els.enable.setAttribute("aria-disabled", "true");
+            els.enable.style.pointerEvents = "none";
+            els.enable.style.opacity = ".45";
+            els.toggleSub.textContent = "Unavailable on this browser";
+          } else {
+            applyKind();
+            Alerts.isEnabled().then(function (on) {
+              setToggle(on);
+              if (on) refresh();
+            }).catch(function () {});
+          }
+        })();
 
         // ---------- boot ----------
         if (state.onboarded) {
