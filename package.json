@@ -1,0 +1,18 @@
+{
+  "name": "gas-tracker-pwa",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "description": "Gas Tracker PWA — live Québec fuel prices + price-alert push notifications.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test alerts/",
+    "gen-vapid": "node alerts/push.mjs --generate-keys"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
